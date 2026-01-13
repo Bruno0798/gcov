@@ -5,23 +5,23 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Configure CMake
-        # Create build directory and generate build files
         run: cmake -S . -B build
 
       - name: Build
-        # Compile the project
         run: cmake --build build
 
       - name: Run Tests
-        # Execute the compiled test runner
+        # This creates the .gcda files Codecov needs
         run: ./build/test_runner
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          # We point to the build folder where .gcno/.gcda files live
           directory: ./build/
+          fail_ci_if_error: true
+          verbose: true
