@@ -1,4 +1,4 @@
-name: C Codecov with Makefile
+name: C Codecov with CMake
 on: [push, pull_request]
 
 jobs:
@@ -7,12 +7,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and Run Tests
-        run: |
-          make
-          make test
+      - name: Configure CMake
+        # Create build directory and generate build files
+        run: cmake -S . -B build
+
+      - name: Build
+        # Compile the project
+        run: cmake --build build
+
+      - name: Run Tests
+        # Execute the compiled test runner
+        run: ./build/test_runner
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          # We point to the build folder where .gcno/.gcda files live
+          directory: ./build/
