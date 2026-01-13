@@ -1,38 +1,24 @@
-name: Code Coverage
-
+name: C Codecov
 on: [push, pull_request]
 
 jobs:
-  coverage:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y lcov cmake
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y lcov
 
-    - name: Build
-      run: |
-        mkdir build
-        cd build
-        cmake ..
-        make
+      - name: Compile with Coverage
+        # --coverage is shorthand for -fprofile-arcs -ftest-coverage
+        run: gcc --coverage -o test_runner math_utils.c test_main.c
 
-    - name: Run Tests
-      run: ./build/my_program
+      - name: Run Tests
+        run: ./test_runner
 
-    - name: Generate Coverage Report
-      run: |
-        lcov --capture --directory . --output-file coverage.info
-        # Filter out system headers
-        lcov --remove coverage.info '/usr/*' --output-file coverage.info
-        genhtml coverage.info --output-directory out
-
-    - name: Upload Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: out/
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          # Codecov automatically finds .gcda and .gcno files
