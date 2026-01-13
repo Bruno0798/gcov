@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(MathTests C)
 
-# 1. Add coverage flags to the compiler
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+# Enable coverage flags for both compiler and linker
+add_compile_options(--coverage -O0 -g)
+add_link_options(--coverage)
 
-# 2. Define the executable
+# Define the executable
 add_executable(test_runner math_utils.c test_main.c)
 
-# 3. Ensure the header file can be found
+# Ensure headers in the current directory are accessible
 target_include_directories(test_runner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
