@@ -1,4 +1,4 @@
-name: C Codecov with CMake
+name: C Coverage (No External Services)
 on: [push, pull_request]
 
 jobs:
@@ -8,20 +8,27 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Configure CMake
-        run: cmake -S . -B build
+      - name: Install gcovr
+        run: sudo apt-get update && sudo apt-get install -y gcovr
 
-      - name: Build
-        run: cmake --build build
+      - name: Configure and Build
+        run: |
+          cmake -S . -B build
+          cmake --build build
 
       - name: Run Tests
-        # This creates the .gcda files Codecov needs
         run: ./build/test_runner
 
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v4
+      - name: Generate Coverage Report
+        run: |
+          # This prints a summary table directly in your GitHub Action logs
+          gcovr -r . --print-summary
+          
+          # This creates a detailed HTML report
+          gcovr -r . --html-details -o coverage_report.html
+
+      - name: Upload Report as Artifact
+        uses: actions/upload-artifact@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./build/
-          fail_ci_if_error: true
-          verbose: true
+          name: coverage-html-report
+          path: coverage_report.html
